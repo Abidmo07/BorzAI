@@ -10,40 +10,44 @@ use Laravel\Socialite\Facades\Socialite;
 
 class OAuthController extends Controller
 {
-    public function redirect(string $provider){
+    public function redirect(string $provider)
+    {
         return Socialite::driver($provider)->redirect();
 
     }
-    public function callback(string $provider){
-        $providerUser=Socialite::driver($provider)->user();
-        if($provider=='github'){
-             $user = User::updateOrCreate(
-                ['github_id' => $providerUser->getId()],
-                [
-                    'name'                   => $providerUser->getName() ?? $providerUser->getNickname() ?? 'N/A',
-                    'email'                  => $providerUser->getEmail(),
-                    'github_token'           => $providerUser->token,
-                    'github_refresh_token'   => $providerUser->refreshToken,
-                   
-                    'password'               => Hash::make(str::random(16)),
-                ]
-            );
-        } else {
-            $user = User::updateOrCreate([
-                   ['google_id' => $providerUser->getId()],
-                [
-                    'name'                   => $providerUser->getName(),
-                    'email'                  => $providerUser->getEmail(),
-                    'google_token'           => $providerUser->token,
-                    'google_refresh_token'   => $providerUser->refreshToken,
-                    'password'               => Hash::make(Str::random(16)),
-                ]
+    public function callback(string $provider)
+    {
+        $socialUser = Socialite::driver($provider)->stateless()->user();
+
+        $providerIdColumn = $provider . '_id';
+        $tokenColumn = $provider . '_token';
+        $refreshTokenColumn = $provider . '_refresh_token';
+
+        $existingUser = User::where('email', $socialUser->getEmail())->first();
+
+        if ($existingUser) {
+            // If user exists, update the provider_id and tokens
+            $existingUser->update([
+                $providerIdColumn => $socialUser->getId(),
+                $tokenColumn => $socialUser->token,
+                $refreshTokenColumn => $socialUser->refreshToken,
             ]);
-            
+            $user = $existingUser;
+        } else {
+            // Create new user
+            $user = User::create([
+                'name' => $socialUser->getName() ?? $socialUser->getNickname() ?? 'No Name',
+                'email' => $socialUser->getEmail(),
+                $providerIdColumn => $socialUser->getId(),
+                $tokenColumn => $socialUser->token,
+                $refreshTokenColumn => $socialUser->refreshToken,
+                'password' => Hash::make(Str::random(16)), 
+            ]);
         }
-        Auth::login($user,true);
-        return redirect(config('app.frontend_url') .'/dashboard');
 
+        Auth::login($user, true);
 
+        return redirect(config('app.frontend_url') . '/dashboard');
     }
+
 }
