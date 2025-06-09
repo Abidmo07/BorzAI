@@ -24,6 +24,7 @@ export default function Login() {
       // Then post to your login API
       const response = await axios.post("http://localhost:8000/api/login", formData);
       console.log(response);
+      
       router.push("/dashboard");
     } catch (error) {
       console.error(error);
