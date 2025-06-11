@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import Loading from '../components/Loading';
+import Chat from '../components/Chat';
 
 axios.defaults.withCredentials = true;
 axios.defaults.withXSRFToken = true;
@@ -61,35 +62,7 @@ export default function Dashboard() {
           </button>
         </header>
 
-        <div className="flex-1 p-6 flex flex-col gap-4 overflow-y-auto bg-gray-50">
-          <div className="max-w-xl self-start bg-white shadow p-4 rounded-md">
-            <p className="text-gray-800">Hello! How can I help you today?</p>
-          </div>
-
-          <div className="max-w-xl self-end bg-blue-100 shadow p-4 rounded-md">
-            <p className="text-gray-800">What’s the weather like in Algiers?</p>
-          </div>
-
-          <div className="max-w-xl self-start bg-white shadow p-4 rounded-md">
-            <p className="text-gray-800">It’s sunny and 25°C in Algiers.</p>
-          </div>
-        </div>
-
-        <div className="p-4 bg-white shadow">
-          <form className="flex items-center gap-4">
-            <input
-              type="text"
-              className="flex-1 border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Type your message..."
-            />
-            <button
-              type="submit"
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            >
-              Send
-            </button>
-          </form>
-        </div>
+        <Chat />      
       </main>
     </div>
   );
