@@ -34,7 +34,6 @@ class OAuthController extends Controller
             ]);
             $user = $existingUser;
         } else {
-            // Create new user
             $user = User::create([
                 'name' => $socialUser->getName() ?? $socialUser->getNickname() ?? 'No Name',
                 'email' => $socialUser->getEmail(),
