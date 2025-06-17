@@ -30,6 +30,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'google_token',
         'google_refresh_token',
     ];
+    public function chats(){
+        return $this->hasMany(Chat::class);
+    }
 
     /**
      * The attributes that should be hidden for serialization.

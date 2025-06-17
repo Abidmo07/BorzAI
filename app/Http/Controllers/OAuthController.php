@@ -46,7 +46,7 @@ class OAuthController extends Controller
 
         Auth::login($user, true);
 
-        return redirect(config('app.frontend_url') . '/dashboard');
+        return redirect(config('app.frontend_url') . '/dashboard/chat/1');
     }
 
 }

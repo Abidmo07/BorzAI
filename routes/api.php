@@ -10,8 +10,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
-
-Route::post('/send',[ChatController::class,'send']);
+Route::get('/chats',[ChatController::class,'chatsPerUser']);
+Route::post('/newChat',[ChatController::class,'addNewChat']);
+Route::post('/chats/{chatId}/send',[ChatController::class,'storeAndSend']);
+Route::get('/chats/{chat}/messages',[ChatController::class,'messagesPerChat']);
 
 
 
