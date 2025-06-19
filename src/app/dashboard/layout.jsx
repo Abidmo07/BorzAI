@@ -88,7 +88,7 @@ export default function DashboardLayout({ children }) {
                 <MessageCircle className="w-6 h-6 text-white" />
               </div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                ChatHub
+                BorzAI
               </h1>
             </div>
             <button
