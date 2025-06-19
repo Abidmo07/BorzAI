@@ -194,8 +194,11 @@ public function send(Request $request)
  
     public function messagesPerChat(Chat $chat)
     {
-        $messages = Message::where("chat_id", $chat->id)->get();
-        return response()->json([
+        if(Auth::user()->id !== $chat->user_id) {
+            abort(403,"Unauthorized");
+        }
+        $messages=$chat->messages()->get();
+      return response()->json([
             "status" => "success",
             "messages" => $messages
         ]);

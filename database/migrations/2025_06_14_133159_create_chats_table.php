@@ -1,3 +1,4 @@
+git branch -d branch-name
 <?php
 
 use Illuminate\Database\Migrations\Migration;
