@@ -29,7 +29,7 @@ export default function Home() {
       {/* Hero Section */}
       <main className="flex-grow container mx-auto px-6 flex flex-col justify-center items-center text-center">
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-800">
-          Welcome to MyChatAI
+          Welcome to BorzAI
         </h1>
         <p className="mt-4 text-lg text-gray-600 max-w-2xl">
           Your intelligent assistant powered by state-of-the-art AI. Chat, learn,
