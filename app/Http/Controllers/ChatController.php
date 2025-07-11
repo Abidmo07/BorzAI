@@ -1,19 +1,67 @@
 <?php
-
+/**
+ * @OA\Info(
+ *     title="My ChatBot API",
+ *     version="1.0.0",
+ *     description="REST endpoints for chatting with the AI assistant",
+ *     @OA\Contact(
+ *         name="ramzi",
+ *         email="abidmo2003@gmail.com"
+ *     )
+ * )
+ *
+ * @OA\SecurityScheme(
+ *     securityScheme="sanctum",
+ *     type="http",
+ *     scheme="bearer",
+ *     bearerFormat="JWT"
+ * )
+ */
 namespace App\Http\Controllers;
 
 use App\Events\AiReplied;
 use App\Models\Chat;
-use App\Models\Message;
-use App\Models\User;
 use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Str;
 
+/**
+ * @OA\Tag(
+ *     name="Chats",
+ *     description="Endpoints related to chats and messages"
+ * )
+ */
+
 class ChatController extends Controller
 {
+
+     /**
+     * @OA\Post(
+     *     path="/api/chats",
+     *     tags={"Chats"},
+     *     summary="Create or send a message in a chat",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"content"},
+     *             @OA\Property(property="title", type="string", example="My Chat"),
+     *             @OA\Property(property="chat_id", type="integer", example=12),
+     *             @OA\Property(property="content", type="string", example="Hello!"),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="user_message", ref="#/components/schemas/Message"),
+     *             @OA\Property(property="ai_message", ref="#/components/schemas/Message")
+     *         )
+     *     )
+     * )
+     */
     public function storeAndSend(Request $request)
 {
     $data = $request->validate([
@@ -65,53 +113,9 @@ class ChatController extends Controller
 
 }
 
-public function send(Request $request)
-{
-    $data = $request->validate([
-        "chat_id" => ["required", "exists:chats,id"],
-        "content" => ["required", "string"], // last user message
-    ]);
 
-    $chat = Chat::findOrFail($data["chat_id"]);
 
-    // Get AI response
-    $aiResponse = $this->getAiResponse($data["content"]);
-
-    // Store AI response
-    $aiMessage = $chat->messages()->create([
-        "content" => $aiResponse,
-        "sender" => "ai"
-    ]);
-
-    // Broadcast if needed
-    event(new AiReplied($data["content"], $aiResponse));
-
-    return response()->json([
-        "status" => "success",
-        "ai_message" => $aiMessage
-    ]);
-}
-
-    /* public function send(Request $request)
-    {
-        $request->validate([
-            'message' => 'required|string',
-        ]);
-
-        $userMessage = $request->input('message');
-        Log::info('Received user message:', ['message' => $userMessage]);
-
-        $botResponse = $this->getAiResponse($userMessage);
-
-        // Broadcast with proper payload
-        event(new AiReplied($userMessage, $botResponse));
-        Log::info('Broadcasting AiReplied event:', ['user_message' => $userMessage, 'bot_response' => $botResponse]);
-
-        return response()->json([
-            'user_message' => $userMessage,
-            'bot_response' => $botResponse,
-        ]);
-    } */
+    
 
     private function getAiResponse(string $message): string
     {
@@ -181,6 +185,28 @@ public function send(Request $request)
             return "I'm sorry, I encountered a technical issue contacting the AI. Please try again later.";
         }
     }
+
+
+      /**
+     * @OA\Get(
+     *     path="/api/chats",
+     *     tags={"Chats"},
+     *     summary="Get all chats for authenticated user",
+     *     security={{"sanctum": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(
+     *                 property="chats",
+     *                 type="array",
+     *                 @OA\Items(ref="#/components/schemas/Chat")
+     *             )
+     *         )
+     *     )
+     * )
+     */
     public function chatsPerUser()
     {
         $userId=Auth::user()->id;
@@ -191,7 +217,32 @@ public function send(Request $request)
         ]);
     }
     
- 
+  /**
+     * @OA\Get(
+     *     path="/api/chats/{chatId}/messages",
+     *     tags={"Chats"},
+     *     summary="Get all messages for a chat",
+     *     @OA\Parameter(
+     *         name="chatId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=5)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(
+     *                 property="messages",
+     *                 type="array",
+     *                 @OA\Items(ref="#/components/schemas/Message")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=403, ref="#/components/responses/Unauthorized")
+     * )
+     */
     public function messagesPerChat(Chat $chat)
     {
         if(Auth::user()->id !== $chat->user_id) {
@@ -204,6 +255,23 @@ public function send(Request $request)
         ]);
 
     }
+
+      /**
+     * @OA\Post(
+     *     path="/api/chats/new",
+     *     tags={"Chats"},
+     *     summary="Create a new empty chat",
+     *     security={{"sanctum": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="chat", ref="#/components/schemas/Chat")
+     *         )
+     *     )
+     * )
+     */
     public function addNewChat(){
           $userId=Auth::user()->id;
           $chat= Chat::create([
