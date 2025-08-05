@@ -1,4 +1,4 @@
-# My App Monorepo
+# BorzAI
 
 A single repository containing both the backend API and frontend client for **My App**. This structure simplifies development, deployment, and onboarding for contributors and users.
 
